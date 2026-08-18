@@ -4,729 +4,422 @@ const { execFile } = require("child_process");
 const { Command } = require("commander");
 
 module.exports = function (program) {
+  const resize = new Command("imageresize");
 
-    const resize = new Command("imageresize");
+  resize
+    .description("Resize images proportionally using physical dimensions")
 
-    resize
-        .description(
-            "Resize images proportionally using physical dimensions"
-        )
+    .argument(
+      "[image]",
+      "Image file to resize. If omitted, process images in current directory.",
+    )
 
-        .argument(
-            "[image]",
-            "Image file to resize. If omitted, process images in current directory."
-        )
+    .option("--height <inches>", "Target height in inches", "36")
 
-        .option(
-            "--height <inches>",
-            "Target height in inches"
-        )
+    .option("--width <inches>", "Target width in inches")
 
-        .option(
-            "--width <inches>",
-            "Target width in inches"
-        )
+    .option("--dpi <number>", "Output resolution in DPI", "150")
 
-        .option(
-            "--dpi <number>",
-            "Output resolution in DPI",
-            "150"
-        )
+    .option("-o, --output <folder>", "Output folder", "resized")
 
-        .option(
-            "-o, --output <folder>",
-            "Output folder",
-            "resized"
-        )
+    .option("-q, --quality <0-100>", "JPEG quality", "100")
 
-        .option(
-            "-q, --quality <0-100>",
-            "JPEG quality",
-            "100"
-        )
+    .option("-r, --recursive", "Process subfolders");
 
-        .option(
-            "-r, --recursive",
-            "Process subfolders"
-        );
+  resize.action((image, options) => {
+    // ========================================
+    // VALIDATE HEIGHT / WIDTH
+    // ========================================
 
+    const hasHeight = options.height !== undefined;
 
-    resize.action((image, options) => {
+    const hasWidth = options.width !== undefined;
 
-        // ========================================
-        // VALIDATE HEIGHT / WIDTH
-        // ========================================
+    if (!hasHeight && !hasWidth) {
+      console.error("❌ Specify either --height or --width.");
 
-        const hasHeight =
-            options.height !== undefined;
+      console.log("");
+      console.log("Examples:");
+      console.log("  teknolikha imageresize image.png --height 20");
+      console.log("  teknolikha imageresize --height 20");
 
-        const hasWidth =
-            options.width !== undefined;
+      process.exit(1);
+    }
 
+    if (hasHeight && hasWidth) {
+      console.error("❌ Use either --height OR --width, not both.");
 
-        if (!hasHeight && !hasWidth) {
+      process.exit(1);
+    }
 
-            console.error(
-                "❌ Specify either --height or --width."
-            );
+    // ========================================
+    // NUMBERS
+    // ========================================
 
-            console.log("");
-            console.log("Examples:");
-            console.log(
-                "  teknolikha imageresize image.png --height 20"
-            );
-            console.log(
-                "  teknolikha imageresize --height 20"
-            );
+    const targetHeight = hasHeight ? Number(options.height) : null;
 
-            process.exit(1);
-        }
+    const targetWidth = hasWidth ? Number(options.width) : null;
 
+    const dpi = Number(options.dpi);
 
-        if (hasHeight && hasWidth) {
+    const quality = Number(options.quality);
 
-            console.error(
-                "❌ Use either --height OR --width, not both."
-            );
+    if (
+      (hasHeight && (!isFinite(targetHeight) || targetHeight <= 0)) ||
+      (hasWidth && (!isFinite(targetWidth) || targetWidth <= 0))
+    ) {
+      console.error("❌ Height/width must be a positive number.");
 
-            process.exit(1);
-        }
+      process.exit(1);
+    }
 
+    if (!Number.isInteger(dpi) || dpi <= 0) {
+      console.error("❌ DPI must be a positive integer.");
 
-        // ========================================
-        // NUMBERS
-        // ========================================
+      process.exit(1);
+    }
 
-        const targetHeight =
-            hasHeight
-                ? Number(options.height)
-                : null;
+    if (!Number.isInteger(quality) || quality < 0 || quality > 100) {
+      console.error("❌ JPEG quality must be between 0 and 100.");
 
-        const targetWidth =
-            hasWidth
-                ? Number(options.width)
-                : null;
+      process.exit(1);
+    }
 
-        const dpi =
-            Number(options.dpi);
+    // ========================================
+    // SUPPORTED IMAGE TYPES
+    // ========================================
 
-        const quality =
-            Number(options.quality);
+    const SUPPORTED = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"];
 
+    // ========================================
+    // GET IMAGE LIST
+    // ========================================
 
-        if (
-            (hasHeight &&
-                (!isFinite(targetHeight) ||
-                    targetHeight <= 0)) ||
+    let files = [];
 
-            (hasWidth &&
-                (!isFinite(targetWidth) ||
-                    targetWidth <= 0))
-        ) {
+    // ========================================
+    // SINGLE IMAGE MODE
+    // ========================================
 
-            console.error(
-                "❌ Height/width must be a positive number."
-            );
+    if (image) {
+      if (!fs.existsSync(image)) {
+        console.error(`❌ Image not found: ${image}`);
 
-            process.exit(1);
-        }
+        process.exit(1);
+      }
 
+      const ext = path.extname(image).toLowerCase();
 
-        if (
-            !Number.isInteger(dpi) ||
-            dpi <= 0
-        ) {
+      if (!SUPPORTED.includes(ext)) {
+        console.error(`❌ Unsupported image format: ${ext}`);
 
-            console.error(
-                "❌ DPI must be a positive integer."
-            );
+        process.exit(1);
+      }
 
-            process.exit(1);
-        }
+      files.push(image);
+    }
 
+    // ========================================
+    // DIRECTORY MODE
+    // ========================================
+    else {
+      function scan(dir) {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-        if (
-            !Number.isInteger(quality) ||
-            quality < 0 ||
-            quality > 100
-        ) {
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
 
-            console.error(
-                "❌ JPEG quality must be between 0 and 100."
-            );
+          // ------------------------------
+          // DIRECTORY
+          // ------------------------------
 
-            process.exit(1);
-        }
-
-
-        // ========================================
-        // SUPPORTED IMAGE TYPES
-        // ========================================
-
-        const SUPPORTED = [
-            ".png",
-            ".jpg",
-            ".jpeg",
-            ".bmp",
-            ".tif",
-            ".tiff"
-        ];
-
-
-        // ========================================
-        // GET IMAGE LIST
-        // ========================================
-
-        let files = [];
-
-
-        // ========================================
-        // SINGLE IMAGE MODE
-        // ========================================
-
-        if (image) {
-
-            if (!fs.existsSync(image)) {
-
-                console.error(
-                    `❌ Image not found: ${image}`
-                );
-
-                process.exit(1);
+          if (entry.isDirectory()) {
+            // Don't scan output directory
+            if (path.resolve(fullPath) === path.resolve(options.output)) {
+              continue;
             }
 
+            if (options.recursive) {
+              scan(fullPath);
+            }
+          }
 
-            const ext =
-                path.extname(image).toLowerCase();
+          // ------------------------------
+          // FILE
+          // ------------------------------
+          else {
+            const ext = path.extname(entry.name).toLowerCase();
 
+            if (SUPPORTED.includes(ext)) {
+              files.push(fullPath);
+            }
+          }
+        }
+      }
 
-            if (!SUPPORTED.includes(ext)) {
+      scan(".");
+    }
 
-                console.error(
-                    `❌ Unsupported image format: ${ext}`
-                );
+    // ========================================
+    // NO FILES
+    // ========================================
 
-                process.exit(1);
+    if (files.length === 0) {
+      console.log("");
+
+      console.log("❌ No supported images found.");
+
+      console.log("");
+
+      process.exit(0);
+    }
+
+    // ========================================
+    // DISPLAY MODE
+    // ========================================
+
+    console.log("");
+
+    console.log("========================================");
+
+    console.log(" TeknoLikha Image Resize");
+
+    console.log("========================================");
+
+    if (image) {
+      console.log("Mode       : Single Image");
+    } else {
+      console.log("Mode       : Current Directory");
+
+      console.log("Recursive  :", options.recursive ? "Yes" : "No");
+    }
+
+    console.log(
+      "Target     :",
+      hasHeight
+        ? `${targetHeight} inches height`
+        : `${targetWidth} inches width`,
+    );
+
+    console.log("Resolution :", `${dpi} DPI`);
+
+    console.log("Images     :", files.length);
+
+    console.log("");
+
+    // ========================================
+    // PROCESS IMAGES
+    // ========================================
+
+    let completed = 0;
+    let success = 0;
+    let failed = 0;
+
+    const startTime = Date.now();
+
+    files.forEach((file) => {
+      // ====================================
+      // READ IMAGE INFORMATION
+      // ====================================
+
+      execFile(
+        "magick",
+
+        ["identify", "-format", "%w %h %[resolution.x] %[resolution.y]", file],
+
+        (err, stdout, stderr) => {
+          if (err) {
+            failed++;
+            completed++;
+
+            console.log(`❌ [${completed}/${files.length}] ${file}`);
+
+            if (completed === files.length) {
+              finish();
             }
 
+            return;
+          }
 
-            files.push(image);
+          const values = stdout.trim().split(/\s+/);
 
-        }
+          const pixelWidth = Number(values[0]);
 
+          const pixelHeight = Number(values[1]);
 
-        // ========================================
-        // DIRECTORY MODE
-        // ========================================
+          let originalDpiX = Number(values[2]);
 
-        else {
+          let originalDpiY = Number(values[3]);
 
-            function scan(dir) {
+          // ====================================
+          // DEFAULT DPI
+          // ====================================
 
-                const entries =
-                    fs.readdirSync(
-                        dir,
-                        { withFileTypes: true }
-                    );
+          if (!isFinite(originalDpiX) || originalDpiX <= 0) {
+            originalDpiX = dpi;
+          }
 
+          if (!isFinite(originalDpiY) || originalDpiY <= 0) {
+            originalDpiY = dpi;
+          }
 
-                for (const entry of entries) {
+          // ====================================
+          // ORIGINAL SIZE
+          // ====================================
 
-                    const fullPath =
-                        path.join(
-                            dir,
-                            entry.name
-                        );
+          const originalWidthInches = pixelWidth / originalDpiX;
 
+          const originalHeightInches = pixelHeight / originalDpiY;
 
-                    // ------------------------------
-                    // DIRECTORY
-                    // ------------------------------
+          // ====================================
+          // NEW SIZE
+          // ====================================
 
-                    if (entry.isDirectory()) {
+          let newWidthInches;
+          let newHeightInches;
 
-                        // Don't scan output directory
-                        if (
-                            path.resolve(fullPath) ===
-                            path.resolve(options.output)
-                        ) {
-                            continue;
-                        }
+          if (hasHeight) {
+            newHeightInches = targetHeight;
 
+            newWidthInches =
+              originalWidthInches * (targetHeight / originalHeightInches);
+          } else {
+            newWidthInches = targetWidth;
 
-                        if (options.recursive) {
-                            scan(fullPath);
-                        }
+            newHeightInches =
+              originalHeightInches * (targetWidth / originalWidthInches);
+          }
 
-                    }
+          // ====================================
+          // NEW PIXELS
+          // ====================================
 
+          const newPixelWidth = Math.round(newWidthInches * dpi);
 
-                    // ------------------------------
-                    // FILE
-                    // ------------------------------
+          const newPixelHeight = Math.round(newHeightInches * dpi);
 
-                    else {
+          // ====================================
+          // OUTPUT FILE
+          // ====================================
 
-                        const ext =
-                            path
-                                .extname(entry.name)
-                                .toLowerCase();
+          let outputFile;
 
+          if (image) {
+            // Single image
+            // Use specified output
+            // or automatic filename
 
-                        if (
-                            SUPPORTED.includes(ext)
-                        ) {
+            if (options.output !== "resized") {
+              outputFile = options.output;
+            } else {
+              const parsed = path.parse(file);
 
-                            files.push(fullPath);
-
-                        }
-                    }
-                }
+              outputFile = path.join(
+                parsed.dir,
+                `${parsed.name}_resized${parsed.ext}`,
+              );
             }
+          } else {
+            // Batch mode
 
+            const relative = path.relative(".", file);
 
-            scan(".");
-        }
-
-
-        // ========================================
-        // NO FILES
-        // ========================================
-
-        if (files.length === 0) {
-
-            console.log("");
-
-            console.log(
-                "❌ No supported images found."
+            outputFile = path.join(
+              options.output,
+              path.dirname(relative),
+              `${path.parse(relative).name}_resized${path.parse(relative).ext}`,
             );
+          }
 
-            console.log("");
+          // ====================================
+          // CREATE OUTPUT DIRECTORY
+          // ====================================
 
-            process.exit(0);
-        }
+          fs.mkdirSync(path.dirname(outputFile), {
+            recursive: true,
+          });
 
+          // ====================================
+          // RESIZE
+          // ====================================
 
-        // ========================================
-        // DISPLAY MODE
-        // ========================================
+          execFile(
+            "magick",
 
-        console.log("");
+            [
+              file,
 
-        console.log(
-            "========================================"
-        );
+              "-resize",
+              `${newPixelWidth}x${newPixelHeight}!`,
 
-        console.log(
-            " TeknoLikha Image Resize"
-        );
+              "-units",
+              "PixelsPerInch",
 
-        console.log(
-            "========================================"
-        );
+              "-density",
+              `${dpi}x${dpi}`,
 
+              "-quality",
+              String(quality),
 
-        if (image) {
+              outputFile,
+            ],
 
-            console.log(
-                "Mode       : Single Image"
-            );
+            (resizeErr, resizeStdout, resizeStderr) => {
+              completed++;
 
-        } else {
+              if (resizeErr) {
+                failed++;
 
-            console.log(
-                "Mode       : Current Directory"
-            );
+                console.log(`❌ [${completed}/${files.length}] ${file}`);
+              } else {
+                success++;
 
-            console.log(
-                "Recursive  :",
-                options.recursive
-                    ? "Yes"
-                    : "No"
-            );
-        }
+                console.log(`✅ [${completed}/${files.length}] ${file}`);
+              }
 
+              // ====================================
+              // FINISHED
+              // ====================================
 
-        console.log(
-            "Target     :",
-            hasHeight
-                ? `${targetHeight} inches height`
-                : `${targetWidth} inches width`
-        );
-
-        console.log(
-            "Resolution :",
-            `${dpi} DPI`
-        );
-
-        console.log(
-            "Images     :",
-            files.length
-        );
-
-        console.log("");
-
-
-        // ========================================
-        // PROCESS IMAGES
-        // ========================================
-
-        let completed = 0;
-        let success = 0;
-        let failed = 0;
-
-        const startTime =
-            Date.now();
-
-
-        files.forEach((file) => {
-
-            // ====================================
-            // READ IMAGE INFORMATION
-            // ====================================
-
-            execFile(
-                "magick",
-
-                [
-                    "identify",
-
-                    "-format",
-                    "%w %h %[resolution.x] %[resolution.y]",
-
-                    file
-                ],
-
-                (err, stdout, stderr) => {
-
-                    if (err) {
-
-                        failed++;
-                        completed++;
-
-                        console.log(
-                            `❌ [${completed}/${files.length}] ${file}`
-                        );
-
-                        if (
-                            completed ===
-                            files.length
-                        ) {
-                            finish();
-                        }
-
-                        return;
-                    }
-
-
-                    const values =
-                        stdout.trim().split(/\s+/);
-
-
-                    const pixelWidth =
-                        Number(values[0]);
-
-                    const pixelHeight =
-                        Number(values[1]);
-
-
-                    let originalDpiX =
-                        Number(values[2]);
-
-                    let originalDpiY =
-                        Number(values[3]);
-
-
-                    // ====================================
-                    // DEFAULT DPI
-                    // ====================================
-
-                    if (
-                        !isFinite(originalDpiX) ||
-                        originalDpiX <= 0
-                    ) {
-
-                        originalDpiX = dpi;
-
-                    }
-
-
-                    if (
-                        !isFinite(originalDpiY) ||
-                        originalDpiY <= 0
-                    ) {
-
-                        originalDpiY = dpi;
-
-                    }
-
-
-                    // ====================================
-                    // ORIGINAL SIZE
-                    // ====================================
-
-                    const originalWidthInches =
-                        pixelWidth /
-                        originalDpiX;
-
-
-                    const originalHeightInches =
-                        pixelHeight /
-                        originalDpiY;
-
-
-                    // ====================================
-                    // NEW SIZE
-                    // ====================================
-
-                    let newWidthInches;
-                    let newHeightInches;
-
-
-                    if (hasHeight) {
-
-                        newHeightInches =
-                            targetHeight;
-
-                        newWidthInches =
-                            originalWidthInches *
-                            (
-                                targetHeight /
-                                originalHeightInches
-                            );
-
-                    } else {
-
-                        newWidthInches =
-                            targetWidth;
-
-                        newHeightInches =
-                            originalHeightInches *
-                            (
-                                targetWidth /
-                                originalWidthInches
-                            );
-                    }
-
-
-                    // ====================================
-                    // NEW PIXELS
-                    // ====================================
-
-                    const newPixelWidth =
-                        Math.round(
-                            newWidthInches *
-                            dpi
-                        );
-
-
-                    const newPixelHeight =
-                        Math.round(
-                            newHeightInches *
-                            dpi
-                        );
-
-
-                    // ====================================
-                    // OUTPUT FILE
-                    // ====================================
-
-                    let outputFile;
-
-
-                    if (image) {
-
-                        // Single image
-                        // Use specified output
-                        // or automatic filename
-
-                        if (
-                            options.output !== "resized"
-                        ) {
-
-                            outputFile =
-                                options.output;
-
-                        } else {
-
-                            const parsed =
-                                path.parse(file);
-
-                            outputFile =
-                                path.join(
-                                    parsed.dir,
-                                    `${parsed.name}_resized${parsed.ext}`
-                                );
-                        }
-
-                    } else {
-
-                        // Batch mode
-
-                        const relative =
-                            path.relative(
-                                ".",
-                                file
-                            );
-
-
-                        outputFile =
-                            path.join(
-                                options.output,
-                                path.dirname(relative),
-                                `${path.parse(relative).name}_resized${path.parse(relative).ext}`
-                            );
-                    }
-
-
-                    // ====================================
-                    // CREATE OUTPUT DIRECTORY
-                    // ====================================
-
-                    fs.mkdirSync(
-                        path.dirname(outputFile),
-                        {
-                            recursive: true
-                        }
-                    );
-
-
-                    // ====================================
-                    // RESIZE
-                    // ====================================
-
-                    execFile(
-                        "magick",
-
-                        [
-                            file,
-
-                            "-resize",
-                            `${newPixelWidth}x${newPixelHeight}!`,
-
-                            "-units",
-                            "PixelsPerInch",
-
-                            "-density",
-                            `${dpi}x${dpi}`,
-
-                            "-quality",
-                            String(quality),
-
-                            outputFile
-                        ],
-
-                        (resizeErr, resizeStdout, resizeStderr) => {
-
-                            completed++;
-
-
-                            if (resizeErr) {
-
-                                failed++;
-
-                                console.log(
-                                    `❌ [${completed}/${files.length}] ${file}`
-                                );
-
-                            } else {
-
-                                success++;
-
-                                console.log(
-                                    `✅ [${completed}/${files.length}] ${file}`
-                                );
-
-                            }
-
-
-                            // ====================================
-                            // FINISHED
-                            // ====================================
-
-                            if (
-                                completed ===
-                                files.length
-                            ) {
-
-                                finish();
-
-                            }
-
-                        }
-                    );
-
-                }
-
-            );
-
-        });
-
-
-        // ========================================
-        // FINISH
-        // ========================================
-
-        function finish() {
-
-            const seconds =
-                (
-                    (
-                        Date.now() -
-                        startTime
-                    ) / 1000
-                ).toFixed(2);
-
-
-            console.log("");
-
-            console.log(
-                "========================================"
-            );
-
-            console.log(
-                " Resize Complete"
-            );
-
-            console.log(
-                "========================================"
-            );
-
-            console.log(
-                "Images Found :",
-                files.length
-            );
-
-            console.log(
-                "Resized      :",
-                success
-            );
-
-            console.log(
-                "Failed       :",
-                failed
-            );
-
-            console.log(
-                "Time         :",
-                seconds + " sec"
-            );
-
-            console.log(
-                "Output       :",
-                options.output
-            );
-
-            console.log(
-                "========================================"
-            );
-
-            console.log("");
-        }
-
+              if (completed === files.length) {
+                finish();
+              }
+            },
+          );
+        },
+      );
     });
 
+    // ========================================
+    // FINISH
+    // ========================================
 
-    program.addCommand(resize);
+    function finish() {
+      const seconds = ((Date.now() - startTime) / 1000).toFixed(2);
 
+      console.log("");
+
+      console.log("========================================");
+
+      console.log(" Resize Complete");
+
+      console.log("========================================");
+
+      console.log("Images Found :", files.length);
+
+      console.log("Resized      :", success);
+
+      console.log("Failed       :", failed);
+
+      console.log("Time         :", seconds + " sec");
+
+      console.log("Output       :", options.output);
+
+      console.log("========================================");
+
+      console.log("");
+    }
+  });
+
+  program.addCommand(resize);
 };
