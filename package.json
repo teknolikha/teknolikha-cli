@@ -1,0 +1,18 @@
+{
+  "name": "teknolikha",
+  "version": "1.0.0",
+  "description": "TeknoLikha Image Processing Toolkit",
+  "main": "index.js",
+  "bin": {
+    "teknolikha": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "commands/**/*",
+    "profiles/**/*"
+  ],
+  "dependencies": {
+    "commander": "^14.0.0",
+    "g": "^2.0.1"
+  }
+}
