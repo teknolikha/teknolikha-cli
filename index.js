@@ -10,6 +10,22 @@ program
   .version("1.0.0", "-v, --version", "Display version");
 
 // ========================================
+// CLEAN
+// ========================================
+
+const cleanCommand = require("./commands/clean");
+
+cleanCommand(program);
+
+// ========================================
+// RESIZE + ICC
+// ========================================
+
+const combinedResizeCommand = require("./commands/resize");
+
+combinedResizeCommand(program);
+
+// ========================================
 // IMAGE RESIZE
 // ========================================
 
