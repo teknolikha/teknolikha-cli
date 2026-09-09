@@ -42,6 +42,18 @@ const iccCommand = require("./commands/iccconvert");
 iccCommand(program);
 
 // ========================================
+// PLACKET
+// ========================================
+
+const placketCommand = require("./commands/placket");
+
+placketCommand(program);
+
+// COLLAR
+const collarCommand = require("./commands/collar");
+collarCommand(program);
+
+// ========================================
 // PARSE
 // ========================================
 
