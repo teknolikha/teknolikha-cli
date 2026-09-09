@@ -9,7 +9,7 @@ module.exports = function (program) {
 
   command
     .description(
-      "Create 5x3 inch landscape placket images with HEX color and convert to the default ICC profile",
+      "Create 8x3.5 inch landscape placket images with HEX color and convert to the default ICC profile",
     )
     .requiredOption("--project <name>", "Project name")
     .requiredOption("--hex <color>", "HEX color code (example: #FF0000)")
@@ -20,8 +20,8 @@ module.exports = function (program) {
     )
     .option("-q, --quality <0-100>", "JPEG quality", "100");
 
-  const WIDTH_INCHES = 5;
-  const HEIGHT_INCHES = 3;
+  const WIDTH_INCHES = 8;
+  const HEIGHT_INCHES = 3.5;
   const DPI = 150;
   const DEFAULT_ICC = "3PASS ICT";
 
@@ -353,7 +353,7 @@ module.exports = function (program) {
     let failed = 0;
 
     for (let i = 1; i <= copy; i++) {
-      const baseName = `placket_5x3_${hex}`;
+      const baseName = `placket_8x3.5_${hex}`;
 
       const outputFile = getUniqueOutputPath(OUTPUT_DIR, baseName);
 
