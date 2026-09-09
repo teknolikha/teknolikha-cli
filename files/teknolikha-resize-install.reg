@@ -1,0 +1,51 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; TeknoLikha - Resize + ICC Convert
+; Right-click context menu installer
+;
+; Adds "Resize + ICC Convert (TeknoLikha)" to the right-click
+; menu for .png, .jpg, .jpeg, .bmp, .tif, .tiff files.
+;
+; Requires: teknolikha-resize.bat placed at
+;   C:\teknolikha\teknolikha-resize.bat
+;
+; Double-click this file and accept the UAC / confirmation
+; prompts to install.
+; ============================================================
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaResize]
+@="Resize + ICC Convert (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaResize\command]
+@="\"C:\\teknolikha\\teknolikha-resize.bat\" \"%1\""

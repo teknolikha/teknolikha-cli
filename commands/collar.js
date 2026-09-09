@@ -28,7 +28,7 @@ module.exports = function (program) {
   const HEIGHT_INCHES = 7.5;
   const DPI = 150;
 
-  const DEFAULT_ICC = "3PASS TARP";
+  const DEFAULT_ICC = "3PASS ICT";
 
   const PROFILE_DIR = path.join(__dirname, "..", "profiles");
 
@@ -239,7 +239,7 @@ module.exports = function (program) {
 
       console.error("Expected profile:");
 
-      console.error("  profiles/3PASS TARP.icm");
+      console.error("  profiles/3PASS ICT.icm");
 
       console.error("");
 
@@ -374,7 +374,7 @@ module.exports = function (program) {
       // 1. Create solid HEX image
       // 2. Set 150 DPI
       // 3. Assign sRGB
-      // 4. Convert to 3PASS TARP
+      // 4. Convert to 3PASS ICT
       // 5. Embed destination ICC
       // ------------------------------------------------
 

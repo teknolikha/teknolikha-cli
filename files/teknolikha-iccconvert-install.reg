@@ -1,0 +1,51 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; TeknoLikha - ICC Convert
+; Right-click context menu installer
+;
+; Adds "Convert ICC Profile (TeknoLikha)" to the right-click
+; menu for .png, .jpg, .jpeg, .bmp, .tif, .tiff files.
+;
+; Requires: teknolikha-iccconvert.bat placed at
+;   C:\teknolikha\teknolikha-iccconvert.bat
+;
+; Double-click this file and accept the UAC / confirmation
+; prompts to install.
+; ============================================================
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaICCConvert]
+@="Convert ICC Profile (TeknoLikha)"
+
+[HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaICCConvert\command]
+@="\"C:\\teknolikha\\teknolikha-iccconvert.bat\" \"%1\""

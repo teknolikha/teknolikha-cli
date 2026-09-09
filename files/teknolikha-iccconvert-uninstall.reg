@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; TeknoLikha - ICC Convert
+; Right-click context menu UNINSTALLER
+;
+; Double-click this file to remove the context menu entry
+; added by teknolikha-iccconvert-install.reg
+; ============================================================
+
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaICCConvert]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaICCConvert]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaICCConvert]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaICCConvert]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaICCConvert]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaICCConvert]

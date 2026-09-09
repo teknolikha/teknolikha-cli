@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; TeknoLikha - Resize + ICC Convert
+; Right-click context menu UNINSTALLER
+;
+; Double-click this file to remove the context menu entry
+; added by teknolikha-resize-install.reg
+; ============================================================
+
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.png\shell\TeknoLikhaResize]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpg\shell\TeknoLikhaResize]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.jpeg\shell\TeknoLikhaResize]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.bmp\shell\TeknoLikhaResize]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.tif\shell\TeknoLikhaResize]
+[-HKEY_CLASSES_ROOT\SystemFileAssociations\.tiff\shell\TeknoLikhaResize]
